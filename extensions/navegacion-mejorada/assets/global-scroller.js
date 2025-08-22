@@ -1,4 +1,4 @@
-    // assets/global-scroller.js
+// assets/global-scroller.js
 // Script global para hashless smooth scrolling desde cualquier enlace.
 
 (() => {
@@ -41,18 +41,29 @@
   }
 
   document.addEventListener('click', (event) => {
-    // Busca un enlace padre que cumpla la condición.
     const link = event.target.closest('a[href*="/#"]');
 
     if (link) {
       const href = link.getAttribute('href');
       const parts = href.split('/#');
       const anchorId = parts[1];
+      const linkPath = parts[0] || '/'; // Asumimos la raíz si no hay nada antes del #
 
-      // Si hay un ID de ancla y estamos en la página correcta (o es solo un ancla)
-      if (anchorId && (parts[0] === '' || window.location.pathname === parts[0])) {
+      // Comprueba si el enlace es para la página actual.
+      if (anchorId && (window.location.pathname === linkPath || linkPath === '/')) {
+        // Previene tanto el salto como la actualización de la URL.
         event.preventDefault();
+        event.stopPropagation();
+
         scrollToElement(anchorId);
+
+        // ¡LA MAGIA ESTÁ AQUÍ!
+        // Asegura que la URL permanezca limpia después del click.
+        if (window.history.pushState) {
+          const cleanUrl = window.location.pathname + window.location.search;
+          // Usamos pushState para mantener el comportamiento del botón "atrás" intacto.
+          window.history.pushState({ path: cleanUrl }, '', cleanUrl);
+        }
       }
     }
   }, { capture: true });

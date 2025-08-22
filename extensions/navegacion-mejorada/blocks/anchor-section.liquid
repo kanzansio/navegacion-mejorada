@@ -1,0 +1,130 @@
+{% comment %}
+  Bloque: anchor-section.liquid
+  Propósito: Agregar un punto de ancla a cualquier sección del tema
+  Ubicación: extensions/navegacion-mejorada/blocks/anchor-section.liquid
+  
+  Este bloque se puede agregar a CUALQUIER sección existente en Shopify
+  desde el editor de temas, sin modificar el código de la sección original.
+{% endcomment %}
+
+{% comment %}
+  Solo renderiza si se ha configurado un ID de ancla
+{% endcomment %}
+{% if block.settings.anchor_id != blank %}
+  <div 
+    id="{{ block.settings.anchor_id | handle }}" 
+    class="section-anchor"
+    data-anchor-name="{{ block.settings.anchor_name | default: block.settings.anchor_id }}"
+    data-show-in-nav="{{ block.settings.show_in_nav }}"
+    data-scroll-offset="{{ block.settings.scroll_offset }}"
+    aria-label="Ancla de navegación: {{ block.settings.anchor_name | default: block.settings.anchor_id }}">
+    
+    {% comment %}
+      Este div actúa como marcador invisible.
+      El CSS lo posiciona correctamente para compensar headers fijos.
+      No contiene contenido visible, solo sirve como punto de referencia.
+    {% endcomment %}
+  </div>
+  
+  {% comment %}
+    Opcionalmente, agregar un indicador visual para debug (solo en modo desarrollo)
+  {% endcomment %}
+  {% if block.settings.debug_mode %}
+    <div class="anchor-debug-indicator" style="
+      background: rgba(255, 0, 0, 0.2);
+      border: 2px dashed red;
+      padding: 10px;
+      margin: 10px 0;
+      font-family: monospace;
+      font-size: 12px;
+    ">
+      🎯 Ancla: #{{ block.settings.anchor_id | handle }}<br>
+      📝 Nombre: {{ block.settings.anchor_name | default: block.settings.anchor_id }}<br>
+      📍 Offset: {{ block.settings.scroll_offset }}px<br>
+      👁️ Visible en nav: {{ block.settings.show_in_nav }}
+    </div>
+  {% endif %}
+{% endif %}
+
+{% comment %}
+  Schema: Define los campos configurables en el editor de Shopify
+{% endcomment %}
+{% schema %}
+{
+  "name": "Ancla de Sección",
+  "target": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "⚓ Configuración del Ancla"
+    },
+    {
+      "type": "text",
+      "id": "anchor_id",
+      "label": "ID del ancla",
+      "info": "Identificador único sin espacios ni caracteres especiales. Ejemplo: 'productos-destacados'",
+      "placeholder": "productos-destacados",
+      "default": ""
+    },
+    {
+      "type": "text",
+      "id": "anchor_name",
+      "label": "Nombre visible",
+      "info": "Texto que aparecerá en el menú de navegación. Si está vacío, se usará el ID.",
+      "placeholder": "Productos Destacados",
+      "default": ""
+    },
+    {
+      "type": "header",
+      "content": "🎛️ Opciones de Visualización"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_in_nav",
+      "label": "Mostrar en menú de navegación",
+      "info": "Si está activo, aparecerá en el menú de navegación automático",
+      "default": true
+    },
+    {
+      "type": "number",
+      "id": "scroll_offset",
+      "label": "Offset de scroll (píxeles)",
+      "info": "Píxeles adicionales para compensar headers fijos. Valor negativo sube, positivo baja.",
+      "default": 0,
+      "placeholder": "80"
+    },
+    {
+      "type": "header",
+      "content": "🔧 Opciones Avanzadas"
+    },
+    {
+      "type": "select",
+      "id": "anchor_position",
+      "label": "Posición del ancla",
+      "options": [
+        {
+          "value": "before",
+          "label": "Antes del contenido"
+        },
+        {
+          "value": "after",
+          "label": "Después del contenido"
+        }
+      ],
+      "default": "before",
+      "info": "Dónde colocar el punto de ancla en relación al contenido de la sección"
+    },
+    {
+      "type": "checkbox",
+      "id": "debug_mode",
+      "label": "Modo debug",
+      "info": "Muestra información visual del ancla (solo para desarrollo)",
+      "default": false
+    },
+    {
+      "type": "paragraph",
+      "content": "💡 **Tip:** Puedes agregar múltiples bloques de ancla a diferentes secciones para crear una navegación completa de tu página."
+    }
+  ]
+}
+{% endschema %}

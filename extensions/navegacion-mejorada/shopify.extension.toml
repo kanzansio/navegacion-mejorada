@@ -1,3 +1,279 @@
+# shopify.extension.toml
+# Archivo de configuración de la extensión de tema
+# Ubicación: extensions/navegacion-mejorada/shopify.extension.toml
+
+# Nombre de la extensión (aparece en el admin de Shopify)
 name = "Navegacion Mejorada"
+
+# Tipo de extensión (theme para extensiones de tema)
 type = "theme"
 
+# ==============================================
+# CAPABILITIES (Capacidades)
+# ==============================================
+# Define qué características soporta tu extensión
+
+[capabilities]
+# Permite agregar bloques a secciones existentes
+blocks = true
+
+# Permite crear nuevas secciones
+sections = true
+
+# ==============================================
+# METAFIELDS (opcional)
+# ==============================================
+# Define metafields personalizados si los necesitas
+
+[[metafields]]
+namespace = "navegacion"
+key = "anchor_config"
+name = "Configuración de Anclas"
+description = "Configuración global para el sistema de anclas"
+type = "json"
+ownerType = "SHOP"
+
+[[metafields]]
+namespace = "navegacion"
+key = "scroll_analytics"
+name = "Analytics de Scroll"
+description = "Datos de comportamiento de scroll de usuarios"
+type = "json"
+ownerType = "SHOP"
+
+# ==============================================
+# SETTINGS (opcional)
+# ==============================================
+# Configuración global de la extensión
+
+[settings]
+# Versión de la API de Shopify a usar
+api_version = "2024-01"
+
+# Si la extensión debe estar activa por defecto
+auto_enable = true
+
+# ==============================================
+# DEVELOPMENT (Desarrollo)
+# ==============================================
+# Configuración para desarrollo local
+
+[development]
+# Puerto para desarrollo local
+port = 9293
+
+# Si mostrar logs detallados
+verbose = true
+
+# Archivos a observar para hot reload
+watch_files = [
+  "**/*.liquid",
+  "**/*.js",
+  "**/*.css",
+  "**/*.json"
+]
+
+# ==============================================
+# BUILD (Construcción)
+# ==============================================
+# Configuración de build/compilación
+
+[build]
+# Directorio de salida
+output_directory = "dist"
+
+# Minificar archivos en producción
+minify = true
+
+# Generar source maps
+source_maps = true
+
+# ==============================================
+# ASSETS (Recursos)
+# ==============================================
+# Configuración de assets/recursos
+
+[assets]
+# Archivos JavaScript
+[[assets.javascript]]
+src = "assets/navegacion-suave.js"
+target = "theme.js"
+
+[[assets.javascript]]
+src = "assets/navegacion-anclas.js"
+target = "theme.js"
+
+# Archivos CSS (si tienes)
+# [[assets.css]]
+# src = "assets/styles.css"
+# target = "theme.css"
+
+# ==============================================
+# LOCALES (Idiomas)
+# ==============================================
+# Configuración de traducciones
+
+[locales]
+default = "en"
+supported = ["en", "es", "fr"]
+
+# ==============================================
+# VALIDATION (Validación)
+# ==============================================
+# Reglas de validación
+
+[validation]
+# Validar sintaxis de Liquid
+validate_liquid = true
+
+# Validar JSON en schemas
+validate_json = true
+
+# Validar accesibilidad
+validate_accessibility = true
+
+# ==============================================
+# COMPATIBILITY (Compatibilidad)
+# ==============================================
+# Requisitos de compatibilidad
+
+[compatibility]
+# Versión mínima de Online Store 2.0
+minimum_os_version = "2.0"
+
+# Temas compatibles (opcional, vacío = todos)
+compatible_themes = []
+
+# Navegadores soportados
+[compatibility.browsers]
+chrome = "90"
+firefox = "88"
+safari = "14"
+edge = "90"
+
+# ==============================================
+# PERMISSIONS (Permisos)
+# ==============================================
+# Permisos requeridos por la extensión
+
+[permissions]
+# Acceso a la API de tema
+theme_api = true
+
+# Acceso a metafields
+metafields = true
+
+# Acceso a configuración del tema
+theme_settings = false
+
+# ==============================================
+# DEPENDENCIES (Dependencias)
+# ==============================================
+# Librerías o dependencias externas
+
+[dependencies]
+# No requiere dependencias externas
+# Las extensiones de tema son independientes
+
+# ==============================================
+# DEPLOY (Despliegue)
+# ==============================================
+# Configuración de despliegue
+
+[deploy]
+# Entornos objetivo
+environments = ["development", "staging", "production"]
+
+# Verificaciones pre-despliegue
+[deploy.checks]
+run_tests = true
+validate_schema = true
+check_deprecations = true
+
+# ==============================================
+# METADATA (Metadatos)
+# ==============================================
+# Información adicional sobre la extensión
+
+[metadata]
+version = "1.0.0"
+author = "Kanzansio"
+email = "tu-email@ejemplo.com"
+website = "https://kanzansio.myshopify.com"
+documentation = "https://github.com/tu-usuario/navegacion-mejorada"
+
+# Categorías para el Shopify App Store (si publicas)
+categories = [
+  "navigation",
+  "user-experience",
+  "accessibility"
+]
+
+# Tags para búsqueda
+tags = [
+  "smooth-scroll",
+  "anchors",
+  "navigation",
+  "single-page",
+  "accessibility",
+  "ux"
+]
+
+# Descripción larga (para el store)
+description = """
+Sistema avanzado de navegación suave con anclas para temas de Shopify.
+Permite crear navegación tipo single-page sin modificar URLs.
+Incluye scroll spy, menús dinámicos y total personalización desde el editor.
+"""
+
+# Changelog
+[metadata.changelog]
+"1.0.0" = "Lanzamiento inicial con navegación suave y sistema de anclas"
+"0.9.0" = "Beta con funcionalidades básicas"
+
+# ==============================================
+# FEATURES (Características destacadas)
+# ==============================================
+# Para mostrar en el admin de Shopify
+
+[[features]]
+name = "Navegación Suave"
+description = "Scroll animado sin cambiar la URL"
+icon = "navigation"
+
+[[features]]
+name = "Anclas Dinámicas"
+description = "Agrega anclas a cualquier sección desde el editor"
+icon = "anchor"
+
+[[features]]
+name = "Menú Automático"
+description = "Genera menú de navegación automáticamente"
+icon = "menu"
+
+[[features]]
+name = "Scroll Spy"
+description = "Detecta y resalta la sección visible"
+icon = "eye"
+
+[[features]]
+name = "Totalmente Accesible"
+description = "Compatible con lectores de pantalla y navegación por teclado"
+icon = "accessibility"
+
+# ==============================================
+# SCREENSHOTS (Capturas de pantalla)
+# ==============================================
+# Para la documentación y store
+
+[[screenshots]]
+src = "docs/images/menu-lateral.png"
+alt = "Menú de navegación lateral con puntos"
+
+[[screenshots]]
+src = "docs/images/configuracion.png"
+alt = "Panel de configuración en el editor de temas"
+
+[[screenshots]]
+src = "docs/images/anclas.png"
+alt = "Sistema de anclas en acción"

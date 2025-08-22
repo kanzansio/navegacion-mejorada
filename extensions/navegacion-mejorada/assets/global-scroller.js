@@ -1,4 +1,5 @@
 // assets/global-scroller.js
+// VERSIÓN ROBUSTA
 // Script global para hashless smooth scrolling desde cualquier enlace.
 
 (() => {
@@ -9,8 +10,7 @@
   const scriptTag = document.currentScript;
   const config = {
     offset: scriptTag?.dataset.offset || '80',
-    duration: parseInt(scriptTag?.dataset.duration || '600', 10),
-    align: scriptTag?.dataset.align || 'start', // Nuevo: 'start' o 'center'
+    align: scriptTag?.dataset.align || 'start',
   };
 
   function getOffset(targetElement) {
@@ -30,46 +30,48 @@
     const target = document.getElementById(elementId);
     if (!target) return;
 
-    const targetPosition = target.getBoundingClientRect().top + window.pageYOffset;
-    const offset = getOffset(target);
-    let finalPosition = targetPosition - offset;
+    // Usar scrollIntoView que es más moderno y maneja la alineación
+    const isReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
-    // ¡NUEVA LÓGICA DE ALINEACIÓN!
-    if (config.align === 'center') {
-      const elementHeight = target.offsetHeight;
-      const viewportHeight = window.innerHeight;
-      // Calcula el espacio libre y lo divide para centrar.
-      // Si la sección es más grande que la pantalla, se alinea arriba para no perder el título.
-      if (elementHeight < viewportHeight) {
-        finalPosition -= (viewportHeight - elementHeight) / 2;
-      }
-    }
+    // El offset se maneja con un scroll-margin-top en el CSS del ancla
+    target.style.scrollMarginTop = `${getOffset(target)}px`;
 
-    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
-        window.scrollTo({ top: finalPosition, behavior: 'auto' });
-    } else {
-        window.scrollTo({ top: finalPosition, behavior: 'smooth' });
-    }
+    target.scrollIntoView({
+      behavior: isReducedMotion ? 'auto' : 'smooth',
+      block: config.align === 'center' ? 'center' : 'start',
+      inline: 'nearest'
+    });
   }
 
-  document.addEventListener('click', (event) => {
+  // Se usa 'mousedown' en lugar de 'click' para actuar ANTES que otros scripts.
+  document.addEventListener('mousedown', (event) => {
     const link = event.target.closest('a[href*="/#"]');
+
     if (link) {
       const href = link.getAttribute('href');
       const parts = href.split('/#');
       const anchorId = parts[1];
       const linkPath = parts[0] || '/';
 
-      if (anchorId && (window.location.pathname === linkPath || linkPath === '/')) {
+      const isCurrentPage = window.location.pathname === linkPath || linkPath === '/';
+      const targetElement = document.getElementById(anchorId);
+
+      if (anchorId && isCurrentPage && targetElement) {
+        // Prevenimos la acción por defecto de la forma más agresiva posible.
         event.preventDefault();
         event.stopPropagation();
+        
         scrollToElement(anchorId);
-        if (window.history.pushState) {
+
+        // Limpiamos la URL
+        if (window.history.replaceState) {
           const cleanUrl = window.location.pathname + window.location.search;
-          window.history.pushState({ path: cleanUrl }, '', cleanUrl);
+          window.history.replaceState(null, '', cleanUrl);
         }
+        
+        return false; // Buena práctica para detener la propagación del evento.
       }
     }
-  }, { capture: true });
+  }, true); // El 'true' al final (useCapture) hace que nuestro script se ejecute primero.
 
 })();

@@ -1,0 +1,13 @@
+{% render 'navegacion-suave' %}
+
+{% schema %}
+{
+  "name": "Navegación suave (anclas)",
+  "target": "section",
+  "settings": [
+    { "type": "text", "id": "selector", "label": "Selector de enlaces (CSS)", "default": "a[href^=\"#\"]" },
+    { "type": "number", "id": "offset", "label": "Offset superior (px)", "default": 0 },
+    { "type": "number", "id": "duration", "label": "Duración (ms)", "default": 500 }
+  ]
+}
+{% endschema %}

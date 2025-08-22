@@ -1,0 +1,12 @@
+{%- liquid
+  assign ns_selector = block.settings.selector | default: 'a[href^="#"]'
+  assign ns_offset = block.settings.offset | default: 0
+  assign ns_duration = block.settings.duration | default: 500
+-%}
+<script
+  src="{{ 'navegacion-suave.js' | asset_url }}"
+  data-selector="{{ ns_selector | escape }}"
+  data-offset="{{ ns_offset }}"
+  data-duration="{{ ns_duration }}"
+  defer>
+</script>

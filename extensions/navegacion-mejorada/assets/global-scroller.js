@@ -10,6 +10,7 @@
   const config = {
     offset: scriptTag?.dataset.offset || '80',
     duration: parseInt(scriptTag?.dataset.duration || '600', 10),
+    align: scriptTag?.dataset.align || 'start', // Nuevo: 'start' o 'center'
   };
 
   function getOffset(targetElement) {
@@ -31,7 +32,18 @@
 
     const targetPosition = target.getBoundingClientRect().top + window.pageYOffset;
     const offset = getOffset(target);
-    const finalPosition = targetPosition - offset;
+    let finalPosition = targetPosition - offset;
+
+    // ¡NUEVA LÓGICA DE ALINEACIÓN!
+    if (config.align === 'center') {
+      const elementHeight = target.offsetHeight;
+      const viewportHeight = window.innerHeight;
+      // Calcula el espacio libre y lo divide para centrar.
+      // Si la sección es más grande que la pantalla, se alinea arriba para no perder el título.
+      if (elementHeight < viewportHeight) {
+        finalPosition -= (viewportHeight - elementHeight) / 2;
+      }
+    }
 
     if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
         window.scrollTo({ top: finalPosition, behavior: 'auto' });
@@ -42,26 +54,18 @@
 
   document.addEventListener('click', (event) => {
     const link = event.target.closest('a[href*="/#"]');
-
     if (link) {
       const href = link.getAttribute('href');
       const parts = href.split('/#');
       const anchorId = parts[1];
-      const linkPath = parts[0] || '/'; // Asumimos la raíz si no hay nada antes del #
+      const linkPath = parts[0] || '/';
 
-      // Comprueba si el enlace es para la página actual.
       if (anchorId && (window.location.pathname === linkPath || linkPath === '/')) {
-        // Previene tanto el salto como la actualización de la URL.
         event.preventDefault();
         event.stopPropagation();
-
         scrollToElement(anchorId);
-
-        // ¡LA MAGIA ESTÁ AQUÍ!
-        // Asegura que la URL permanezca limpia después del click.
         if (window.history.pushState) {
           const cleanUrl = window.location.pathname + window.location.search;
-          // Usamos pushState para mantener el comportamiento del botón "atrás" intacto.
           window.history.pushState({ path: cleanUrl }, '', cleanUrl);
         }
       }

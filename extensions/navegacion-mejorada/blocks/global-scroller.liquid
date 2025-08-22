@@ -1,19 +1,20 @@
 {%- comment -%}
   Bloque: global-scroller.liquid (App Embed)
   Propósito: Cargar el script de scroll suave en todas las páginas.
-  Este bloque es invisible y se activa una vez en el personalizador de temas.
 {%- endcomment -%}
 
 {%- liquid
   assign scroll_offset = block.settings.offset | default: '80'
   assign scroll_duration = block.settings.duration | default: 600
+  assign scroll_align = block.settings.scroll_align | default: 'start'
 -%}
 
 <script 
   src="{{ 'global-scroller.js' | asset_url }}" 
   defer
   data-offset="{{ scroll_offset }}"
-  data-duration="{{ scroll_duration }}">
+  data-duration="{{ scroll_duration }}"
+  data-align="{{ scroll_align }}">
 </script>
 
 {% schema %}
@@ -25,6 +26,17 @@
     {
       "type": "header",
       "content": "Configuración Global del Scroll"
+    },
+    {
+      "type": "select",
+      "id": "scroll_align",
+      "label": "Alineación de la sección",
+      "options": [
+        { "value": "start", "label": "Arriba (debajo del header)" },
+        { "value": "center", "label": "En el centro de la pantalla" }
+      ],
+      "default": "start",
+      "info": "Elige dónde se posicionará la sección después del scroll."
     },
     {
       "type": "text",
@@ -42,6 +54,6 @@
       "step": 100,
       "default": 600
     }
-  ] 
+  ]
 }
 {% endschema %}

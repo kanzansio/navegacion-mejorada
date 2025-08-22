@@ -1,55 +1,196 @@
-/* Scope por bloque */
-#shopify-block-{{ block.id }} {
-  --nav-background: {{ block.settings.nav_background }};
-  --nav-color: {{ block.settings.nav_color }};
-  --nav-active-color: {{ block.settings.nav_active_color }};
-  --nav-hover-color: {{ block.settings.nav_hover_color }};
-  --nav-transition-speed: {{ block.settings.transition_speed }}ms;
-  --nav-blur: {{ block.settings.blur_amount }}px;
+/*
+ * anchor-navigation.css
+ * Estilos para el sistema de navegación por anclas.
+ */
+
+/* ==========================================================================
+   Contenedor Principal del Bloque
+   ========================================================================== */
+
+.anchor-nav-block {
+  /*
+   * Las variables de color y transición son inyectadas en línea
+   * desde el bloque anchor-navigation-menu.liquid.
+   * Esto permite la personalización desde el editor de temas.
+   */
+  --nav-bg: #ffffff;
+  --nav-color: #333333;
+  --nav-active-color: #007bff;
+  --nav-hover-color: #0056b3;
+  --progress-color: #007bff;
+  --progress-height: 3px;
+  --nav-transition: 300ms;
 }
 
-/* Ocultar en móvil si procede */
-{% if block.settings.hide_on_mobile %}
-@media (max-width: 768px) {
-  #shopify-block-{{ block.id }} .anchor-navigation { display: none; }
-}
-{% endif %}
+/* ==========================================================================
+   Contenedor del Menú
+   ========================================================================== */
 
-/* Auto-hide */
-{% if block.settings.auto_hide %}
-#shopify-block-{{ block.id }} .anchor-navigation {
-  transition: opacity var(--nav-transition-speed) ease,
-              transform var(--nav-transition-speed) ease;
+.anchor-navigation {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1000;
+  background: var(--nav-bg);
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: opacity var(--nav-transition) ease, transform var(--nav-transition) ease;
 }
-#shopify-block-{{ block.id }} .anchor-navigation.nav-hidden {
+
+/* Posiciones */
+.anchor-nav-fixed-left {
+  left: 20px;
+}
+.anchor-nav-fixed-right {
+  right: 20px;
+}
+
+/* Comportamiento de Auto-Ocultado */
+.anchor-navigation.nav-hidden {
   opacity: 0;
   pointer-events: none;
-  transform: translateX({% if block.settings.nav_position == 'fixed-left' %}-20px{% else %}20px{% endif %});
 }
-{% endif %}
+.anchor-nav-fixed-left.nav-hidden {
+  transform: translateY(-50%) translateX(-20px);
+}
+.anchor-nav-fixed-right.nav-hidden {
+  transform: translateY(-50%) translateX(20px);
+}
 
-/* Progress bar */
-{% if block.settings.show_progress %}
-#shopify-block-{{ block.id }} .scroll-progress-indicator {
-  position: fixed; top: 0; left: 0; width: 100%;
-  height: {{ block.settings.progress_height }}px;
-  background: rgba(0,0,0,0.1);
+/* ==========================================================================
+   Lista de Navegación y Elementos
+   ========================================================================== */
+
+.anchor-nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.anchor-nav-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+.anchor-nav-item {
+  position: relative;
+}
+
+.anchor-nav-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: transparent;
+  transition: transform var(--nav-transition) ease;
+  position: relative; /* Para el tooltip */
+}
+
+/* Estilo de Puntos (Dots) */
+.anchor-nav-style-dots .anchor-nav-link::before {
+  content: '';
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--nav-color);
+  transition: all var(--nav-transition) ease;
+}
+
+.anchor-nav-style-dots .anchor-nav-link:hover::before,
+.anchor-nav-style-dots .anchor-nav-link.active-anchor::before {
+  background-color: var(--nav-active-color);
+  transform: scale(1.5);
+}
+
+/* Estilo de Líneas (Lines) */
+.anchor-nav-style-lines .anchor-nav-link {
+  width: 24px;
+  height: 2px;
+  border-radius: 1px;
+  background-color: var(--nav-color);
+  margin: 8px 0;
+}
+
+.anchor-nav-style-lines .anchor-nav-link.active-anchor,
+.anchor-nav-style-lines .anchor-nav-link:hover {
+  background-color: var(--nav-active-color);
+  transform: scaleX(1.5);
+}
+
+
+/* ==========================================================================
+   Etiquetas / Tooltips
+   ========================================================================== */
+
+.anchor-nav-label {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: var(--nav-bg);
+  color: var(--nav-color);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--nav-transition) ease, transform var(--nav-transition) ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.anchor-nav-fixed-right .anchor-nav-label {
+  right: 150%;
+  transform-origin: right center;
+}
+.anchor-nav-fixed-left .anchor-nav-label {
+  left: 150%;
+  transform-origin: left center;
+}
+
+/* Mostrar etiquetas al pasar el ratón por el contenedor o cuando la opción está activa */
+.anchor-navigation:hover .anchor-nav-label,
+.anchor-navigation[data-show-labels="true"] .anchor-nav-label {
+  opacity: 1;
+}
+
+.anchor-nav-fixed-right .anchor-navigation:hover .anchor-nav-label,
+.anchor-nav-fixed-right .anchor-navigation[data-show-labels="true"] .anchor-nav-label {
+  transform: translateY(-50%) translateX(-10px);
+}
+.anchor-nav-fixed-left .anchor-navigation:hover .anchor-nav-label,
+.anchor-nav-fixed-left .anchor-navigation[data-show-labels="true"] .anchor-nav-label {
+  transform: translateY(-50%) translateX(10px);
+}
+
+/* ==========================================================================
+   Barra de Progreso
+   ========================================================================== */
+
+.scroll-progress-indicator {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--progress-height);
+  background: rgba(128, 128, 128, 0.2);
   z-index: 9999;
 }
-#shopify-block-{{ block.id }} .scroll-progress-bar {
-  height: 100%;
-  background: {{ block.settings.progress_color }};
-  width: 0%;
-  transition: width 0.2s ease;
-}
-{% endif %}
 
-/* Glassmorphism */
-{% if block.settings.glass_effect %}
-#shopify-block-{{ block.id }} .anchor-navigation {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(var(--nav-blur));
-  -webkit-backdrop-filter: blur(var(--nav-blur));
-  border: 1px solid rgba(255, 255, 255, 0.2);
+.scroll-progress-bar {
+  height: 100%;
+  background: var(--progress-color);
+  width: 0%;
+  transition: width 0.1s linear;
 }
-{% endif %}
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+/* La lógica para ocultar en móvil se hará con un `style` tag en el .liquid */

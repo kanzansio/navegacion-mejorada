@@ -1,0 +1,55 @@
+/* Scope por bloque */
+#shopify-block-{{ block.id }} {
+  --nav-background: {{ block.settings.nav_background }};
+  --nav-color: {{ block.settings.nav_color }};
+  --nav-active-color: {{ block.settings.nav_active_color }};
+  --nav-hover-color: {{ block.settings.nav_hover_color }};
+  --nav-transition-speed: {{ block.settings.transition_speed }}ms;
+  --nav-blur: {{ block.settings.blur_amount }}px;
+}
+
+/* Ocultar en móvil si procede */
+{% if block.settings.hide_on_mobile %}
+@media (max-width: 768px) {
+  #shopify-block-{{ block.id }} .anchor-navigation { display: none; }
+}
+{% endif %}
+
+/* Auto-hide */
+{% if block.settings.auto_hide %}
+#shopify-block-{{ block.id }} .anchor-navigation {
+  transition: opacity var(--nav-transition-speed) ease,
+              transform var(--nav-transition-speed) ease;
+}
+#shopify-block-{{ block.id }} .anchor-navigation.nav-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX({% if block.settings.nav_position == 'fixed-left' %}-20px{% else %}20px{% endif %});
+}
+{% endif %}
+
+/* Progress bar */
+{% if block.settings.show_progress %}
+#shopify-block-{{ block.id }} .scroll-progress-indicator {
+  position: fixed; top: 0; left: 0; width: 100%;
+  height: {{ block.settings.progress_height }}px;
+  background: rgba(0,0,0,0.1);
+  z-index: 9999;
+}
+#shopify-block-{{ block.id }} .scroll-progress-bar {
+  height: 100%;
+  background: {{ block.settings.progress_color }};
+  width: 0%;
+  transition: width 0.2s ease;
+}
+{% endif %}
+
+/* Glassmorphism */
+{% if block.settings.glass_effect %}
+#shopify-block-{{ block.id }} .anchor-navigation {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(var(--nav-blur));
+  -webkit-backdrop-filter: blur(var(--nav-blur));
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+{% endif %}

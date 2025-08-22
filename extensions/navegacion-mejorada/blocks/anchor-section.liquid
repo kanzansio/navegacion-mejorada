@@ -1,7 +1,6 @@
 {%- comment -%}
   Bloque: anchor-section.liquid
-  Propósito: Agregar un punto de ancla invisible a cualquier sección del tema.
-  Se puede agregar desde el editor de temas sin modificar el código original de la sección.
+  Añade puntos de ancla invisibles a cualquier sección
 {%- endcomment -%}
 
 {%- if block.settings.anchor_id != blank -%}
@@ -9,8 +8,8 @@
     id="{{ block.settings.anchor_id | handle }}" 
     class="section-anchor"
     data-scroll-offset="{{ block.settings.scroll_offset }}"
+    style="position: absolute; top: -1px; visibility: hidden;"
     aria-hidden="true">
-    {%- comment -%} Este div es un marcador invisible para el scroll. {%- endcomment -%}
   </div>
 {%- endif -%}
 
@@ -20,20 +19,17 @@
   "target": "section",
   "settings": [
     {
-      "type": "header",
-      "content": "⚓ Configuración del Ancla"
-    },
-    {
       "type": "text",
       "id": "anchor_id",
       "label": "ID del Ancla",
-      "info": "Identificador único para esta sección. Ejemplo: 'desarrollo'. Este ID se usará en el enlace del menú (ej: /#desarrollo)."
+      "placeholder": "desarrollo",
+      "info": "Nombre único para esta sección (sin espacios ni caracteres especiales)"
     },
     {
       "type": "number",
       "id": "scroll_offset",
-      "label": "Ajuste de scroll (offset)",
-      "info": "Ajuste fino para esta ancla específica. Anula el offset global. Usa un valor negativo para subir o positivo para bajar.",
+      "label": "Ajuste de posición (px)",
+      "info": "Ajuste fino opcional. Negativo = más arriba, Positivo = más abajo",
       "default": 0
     }
   ]

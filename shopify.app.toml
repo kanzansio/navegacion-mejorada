@@ -2,7 +2,7 @@
 
 client_id = "c7d3808eee057b62f88c77d6213efb5f"
 name = "Navegacion Mejorada"
-application_url = "https://houses-features-neighbors-southern.trycloudflare.com"
+application_url = "https://firewire-haiti-ac-metabolism.trycloudflare.com"
 embedded = true
 handle = "navegacion-mejorada"
 
@@ -26,7 +26,7 @@ api_version = "2025-07"
 scopes = "write_products"
 
 [auth]
-redirect_urls = ["https://houses-features-neighbors-southern.trycloudflare.com/auth/callback", "https://houses-features-neighbors-southern.trycloudflare.com/auth/shopify/callback", "https://houses-features-neighbors-southern.trycloudflare.com/api/auth/callback"]
+redirect_urls = ["https://firewire-haiti-ac-metabolism.trycloudflare.com/auth/callback", "https://firewire-haiti-ac-metabolism.trycloudflare.com/auth/shopify/callback", "https://firewire-haiti-ac-metabolism.trycloudflare.com/api/auth/callback"]
 
 [pos]
 embedded = false

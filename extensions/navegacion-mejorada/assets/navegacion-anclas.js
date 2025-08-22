@@ -1,387 +1,295 @@
-// navegacion-anclas.js
-// Sistema completo de navegación con anclas sin hash para Shopify
-(function() {
+// assets/navegacion-anclas.js
+// Sistema unificado de navegación por anclas para Shopify.
+// Incluye smooth scroll, scroll spy, menú dinámico, auto-ocultado y barra de progreso.
+
+(() => {
   'use strict';
-  
-  // ==============================================
-  // CONFIGURACIÓN
-  // ==============================================
-  // Lee configuración desde los data attributes del script
-  const script = document.currentScript;
-  const config = {
-    duration: parseInt(script?.dataset.duration || '600', 10),        // Duración del scroll en ms
-    offset: script?.dataset.offset || '0',                           // Offset para headers fijos
-    updateUrl: script?.dataset.updateUrl === 'true',                 // Si actualiza la URL con hash
-    menuSelector: script?.dataset.menuSelector || '.anchor-navigation', // Selector del contenedor del menú
-    activeClass: script?.dataset.activeClass || 'active-anchor',      // Clase CSS para elemento activo
-    allowQuery: script?.dataset.allowQuery !== 'false'                // Permite ?sec=seccion en URL
-  };
 
-  // ==============================================
-  // UTILIDADES
-  // ==============================================
-  const utils = {
-    // Obtener el offset dinámicamente (puede ser un número o selector CSS)
-    getOffset() {
-      // Si es un selector CSS (empieza con #, . o [)
-      if (/^[#.\[]/.test(config.offset)) {
-        const el = document.querySelector(config.offset);
-        return el ? el.getBoundingClientRect().height : 0;
-      }
-      // Si es un número
-      return parseInt(config.offset, 10) || 0;
-    },
+  // Solo se ejecuta una vez, incluso si el script se carga varias veces.
+  if (window.AnchorNavigationInitialized) return;
+  window.AnchorNavigationInitialized = true;
 
-    // Función de easing para animación suave (easeInOutCubic)
-    easeInOutCubic(t) {
-      return t < 0.5 
-        ? 4 * t * t * t 
-        : 1 - Math.pow(-2 * t + 2, 3) / 2;
-    },
+  class AnchorNavigation {
+    constructor(blockElement) {
+      this.block = blockElement;
+      if (!this.block) return;
 
-    // Detectar si el usuario prefiere movimiento reducido
-    prefersReducedMotion() {
-      return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-    },
+      this.config = this.loadConfig();
+      this.init();
+    }
 
-    // Obtener todas las anclas definidas en la página
+    /**
+     * Carga la configuración desde los atributos de datos del elemento del bloque.
+     */
+    loadConfig() {
+      const dataset = this.block.dataset;
+      return {
+        // --- Configuración de Scroll ---
+        duration: parseInt(dataset.scrollDuration || '600', 10),
+        headerOffset: dataset.headerOffset || '80',
+
+        // --- Configuración del Menú ---
+        menuSelector: '.anchor-navigation', // Selector local al bloque
+        activeClass: 'active-anchor',
+        
+        // --- Funcionalidades Adicionales ---
+        autoHide: dataset.autoHide === 'true',
+        autoHideDelay: parseInt(dataset.autoHideDelay || '3000', 10),
+        showProgress: dataset.showProgress === 'true',
+      };
+    }
+
+    /**
+     * Inicializa todas las funcionalidades.
+     */
+    init() {
+      this.menuContainer = this.block.querySelector(this.config.menuSelector);
+      this.anchors = this.getAllAnchors();
+      
+      this.buildMenu();
+      this.setupEventListeners();
+      
+      if (this.config.showProgress) this.setupProgressBar();
+      if (this.config.autoHide) this.setupAutoHide();
+      
+      this.setupScrollSpy();
+      this.handleInitialLoad();
+
+      // Exponer API pública
+      window.AnchorNavigation = {
+        scrollTo: this.scrollToElement.bind(this),
+        refresh: this.refresh.bind(this),
+        getAnchors: this.getAllAnchors.bind(this),
+      };
+      
+      window.dispatchEvent(new CustomEvent('anchorNavigationReady'));
+    }
+
+    // ==============================================
+    // LÓGICA DEL MENÚ Y ANCLAS
+    // ==============================================
+
+    /**
+     * Obtiene todas las anclas de la página.
+     */
     getAllAnchors() {
       return Array.from(document.querySelectorAll('.section-anchor[id]'))
+        .filter(el => el.dataset.showInNav !== 'false')
         .map(el => ({
           id: el.id,
-          name: el.dataset.anchorName || el.id,
-          element: el,
-          offset: parseInt(el.dataset.scrollOffset || '0', 10)
+          name: el.dataset.anchorName || el.id.replace(/-/g, ' '),
+          element: el
         }));
     }
-  };
 
-  // ==============================================
-  // SISTEMA DE SCROLL SUAVE
-  // ==============================================
-  const smoothScroll = {
-    // Realizar scroll animado a una posición Y específica
-    scrollTo(targetY, duration, callback) {
-      // Si duración es 0 o el usuario prefiere movimiento reducido
-      if (duration <= 0 || utils.prefersReducedMotion()) {
-        window.scrollTo({ top: targetY, behavior: 'auto' });
-        if (callback) callback();
-        return;
-      }
-
-      const startY = window.pageYOffset;
-      const distance = targetY - startY;
-      const startTime = performance.now();
-
-      // Función de animación
-      function animate(currentTime) {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        const eased = utils.easeInOutCubic(progress);
-        
-        window.scrollTo(0, startY + (distance * eased));
-
-        if (progress < 1) {
-          requestAnimationFrame(animate);
-        } else if (callback) {
-          callback();
-        }
-      }
-
-      requestAnimationFrame(animate);
-    },
-
-    // Scroll a un elemento específico por ID o referencia
-    scrollToElement(elementOrId, customOffset) {
-      const element = typeof elementOrId === 'string' 
-        ? document.getElementById(elementOrId)
-        : elementOrId;
-        
-      if (!element) return false;
-
-      // Calcular posición del elemento
-      const rect = element.getBoundingClientRect();
-      const absoluteTop = rect.top + window.pageYOffset;
-      const offset = customOffset !== undefined ? customOffset : utils.getOffset();
-      const targetY = Math.max(0, absoluteTop - offset);
-
-      // Realizar scroll con callback para actualizar estado
-      this.scrollTo(targetY, config.duration, () => {
-        this.updateActiveState(element.id);
-      });
-
-      return true;
-    },
-
-    // Actualizar qué ancla está activa en el menú
-    updateActiveState(activeId) {
-      // Remover todas las clases activas anteriores
-      document.querySelectorAll(`.${config.activeClass}`).forEach(el => {
-        el.classList.remove(config.activeClass);
-      });
-
-      // Agregar clase activa al enlace correspondiente
-      if (activeId) {
-        const links = document.querySelectorAll(`a[href="#${activeId}"], a[data-anchor="${activeId}"]`);
-        links.forEach(link => {
-          link.classList.add(config.activeClass);
-          // También marcar el contenedor padre (li) si existe
-          const parent = link.closest('li, .nav-item');
-          if (parent) parent.classList.add(config.activeClass);
-        });
-      }
-    }
-  };
-
-  // ==============================================
-  // GENERADOR DE MENÚ DE NAVEGACIÓN
-  // ==============================================
-  const navigationBuilder = {
-    updateTimeout: null,
-
-    // Construir el menú de navegación dinámicamente
+    /**
+     * Construye el menú de navegación dinámicamente.
+     */
     buildMenu() {
-      const container = document.querySelector(config.menuSelector);
-      if (!container) return;
+      if (!this.menuContainer || this.anchors.length === 0) return;
 
-      const anchors = utils.getAllAnchors();
-      if (anchors.length === 0) return;
-
-      // Limpiar contenedor
-      container.innerHTML = '';
-
-      // Crear estructura del menú
+      this.menuContainer.innerHTML = '';
       const nav = document.createElement('nav');
       nav.className = 'anchor-nav-list';
-      nav.setAttribute('role', 'navigation');
       nav.setAttribute('aria-label', 'Navegación de página');
 
       const ul = document.createElement('ul');
       ul.className = 'anchor-nav-items';
 
-      // Crear un item de menú por cada ancla
-      anchors.forEach(anchor => {
+      this.anchors.forEach(anchor => {
         const li = document.createElement('li');
         li.className = 'anchor-nav-item';
 
         const a = document.createElement('a');
         a.href = `#${anchor.id}`;
-        a.textContent = anchor.name;
         a.className = 'anchor-nav-link';
-        a.dataset.anchor = anchor.id;
+        a.dataset.anchorTarget = anchor.id;
         a.setAttribute('aria-label', `Ir a ${anchor.name}`);
+        
+        const span = document.createElement('span');
+        span.className = 'anchor-nav-label';
+        span.textContent = anchor.name;
 
+        a.appendChild(span);
         li.appendChild(a);
         ul.appendChild(li);
       });
 
       nav.appendChild(ul);
-      container.appendChild(nav);
-    },
-
-    // Actualizar menú con debounce para evitar múltiples actualizaciones
-    updateMenu() {
-      clearTimeout(this.updateTimeout);
-      this.updateTimeout = setTimeout(() => {
-        this.buildMenu();
-      }, 100);
+      this.menuContainer.appendChild(nav);
     }
-  };
+    
+    /**
+     * Refresca la lista de anclas y reconstruye el menú.
+     */
+    refresh() {
+        this.anchors = this.getAllAnchors();
+        this.buildMenu();
+        this.setupScrollSpy();
+    }
 
-  // ==============================================
-  // OBSERVADOR DE SCROLL (INTERSECTION OBSERVER)
-  // ==============================================
-  const scrollObserver = {
-    sections: new Map(),
-    observer: null,
+    // ==============================================
+    // LÓGICA DE SCROLL Y ESTADO ACTIVO
+    // ==============================================
 
-    // Inicializar el observador
-    init() {
-      // Configuración del Intersection Observer
-      // rootMargin ajusta el área de detección
-      const options = {
-        rootMargin: `-${utils.getOffset()}px 0px -50% 0px`,
-        threshold: [0, 0.1, 0.5, 1] // Múltiples puntos de detección
-      };
+    /**
+     * Obtiene el offset para el scroll.
+     */
+    getOffset() {
+      const offsetValue = this.config.headerOffset;
+      if (offsetValue.startsWith('#') || offsetValue.startsWith('.')) {
+        const el = document.querySelector(offsetValue);
+        return el ? el.getBoundingClientRect().height : 0;
+      }
+      return parseInt(offsetValue, 10) || 0;
+    }
+    
+    /**
+     * Scroll suave a un elemento.
+     */
+    scrollToElement(elementId) {
+      const target = document.getElementById(elementId);
+      if (!target) return;
 
-      // Crear observador
-      this.observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          // Guardar estado de visibilidad de cada sección
-          this.sections.set(entry.target.id, entry.isIntersecting);
+      const targetPosition = target.getBoundingClientRect().top + window.pageYOffset;
+      const offset = this.getOffset();
+      const finalPosition = targetPosition - offset;
+
+      if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+          window.scrollTo({ top: finalPosition, behavior: 'auto' });
+      } else {
+          window.scrollTo({
+              top: finalPosition,
+              behavior: 'smooth'
+          });
+      }
+    }
+    
+    /**
+     * Actualiza la clase activa en el menú.
+     */
+    updateActiveState(targetId) {
+        this.block.querySelectorAll(`.${this.config.activeClass}`).forEach(el => {
+            el.classList.remove(this.config.activeClass);
         });
 
-        // Actualizar sección activa
-        const visibleSection = this.getMostVisibleSection();
-        if (visibleSection) {
-          smoothScroll.updateActiveState(visibleSection);
+        if (targetId) {
+            const activeLink = this.block.querySelector(`a[href="#${targetId}"]`);
+            if (activeLink) {
+                activeLink.classList.add(this.config.activeClass);
+                activeLink.closest('li')?.classList.add(this.config.activeClass);
+            }
         }
-      }, options);
+    }
 
-      // Observar todas las anclas
-      utils.getAllAnchors().forEach(anchor => {
-        if (anchor.element) {
-          this.observer.observe(anchor.element);
+    // ==============================================
+    // FUNCIONALIDADES EXTRA
+    // ==============================================
+
+    /**
+     * Configura la barra de progreso de scroll.
+     */
+    setupProgressBar() {
+      this.progressBar = this.block.querySelector('.scroll-progress-bar');
+      if (!this.progressBar) return;
+
+      const onScroll = () => {
+        const top = window.pageYOffset || document.documentElement.scrollTop;
+        const h = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        const percent = h > 0 ? (top / h) * 100 : 0;
+        this.progressBar.style.width = `${percent}%`;
+      };
+      
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll(); // Llama una vez para estado inicial
+    }
+
+    /**
+     * Configura el auto-ocultado del menú.
+     */
+    setupAutoHide() {
+      if (!this.menuContainer) return;
+      
+      let timer = null;
+      const show = () => {
+        this.menuContainer.classList.remove('nav-hidden');
+        clearTimeout(timer);
+        timer = setTimeout(() => this.menuContainer.classList.add('nav-hidden'), this.config.autoHideDelay);
+      };
+      
+      ['scroll', 'mousemove', 'touchstart'].forEach(ev => window.addEventListener(ev, show, { passive: true }));
+      show(); // Llama una vez para estado inicial
+    }
+
+    // ==============================================
+    // MANEJADORES DE EVENTOS
+    // ==============================================
+
+    /**
+     * Configura todos los listeners.
+     */
+    setupEventListeners() {
+      this.block.addEventListener('click', (e) => {
+        const link = e.target.closest('a[data-anchor-target]');
+        if (link) {
+          e.preventDefault();
+          const targetId = link.dataset.anchorTarget;
+          this.scrollToElement(targetId);
         }
       });
-    },
-
-    // Obtener la sección más visible actualmente
-    getMostVisibleSection() {
-      const visible = Array.from(this.sections.entries())
-        .filter(([, isVisible]) => isVisible)
-        .map(([id]) => id);
-      
-      return visible[0] || null;
-    },
-
-    // Refrescar observador cuando cambian las anclas
-    refresh() {
-      if (this.observer) {
-        this.observer.disconnect();
-        this.sections.clear();
-        this.init();
-      }
     }
-  };
-
-  // ==============================================
-  // MANEJADORES DE EVENTOS
-  // ==============================================
-  const eventHandlers = {
-    // Manejar clicks en enlaces de ancla
-    handleClick(e) {
-      // Buscar si el click fue en un enlace de ancla
-      const link = e.target.closest('a[href^="#"], a[data-anchor]');
-      if (!link) return;
-
-      // Obtener ID del ancla
-      const anchorId = link.dataset.anchor || link.getAttribute('href')?.slice(1);
-      if (!anchorId) return;
-
-      // Buscar el elemento
-      const element = document.getElementById(anchorId);
-      if (!element) return;
-
-      // Prevenir comportamiento por defecto
-      e.preventDefault();
-      
-      // Realizar scroll suave
-      const customOffset = element.closest('.section-anchor')?.dataset.scrollOffset;
-      smoothScroll.scrollToElement(element, customOffset ? parseInt(customOffset, 10) : undefined);
-
-      // Opcionalmente actualizar URL sin causar scroll
-      if (config.updateUrl) {
-        history.replaceState({ anchor: anchorId }, '', `#${anchorId}`);
-      }
-
-      // Disparar evento personalizado para que otros scripts puedan escuchar
-      window.dispatchEvent(new CustomEvent('anchorNavigate', {
-        detail: { anchor: anchorId, element }
-      }));
-    },
-
-    // Manejar carga inicial con query parameter (?sec=seccion)
-    handleInitialLoad() {
-      if (!config.allowQuery) return;
-
-      const params = new URLSearchParams(location.search);
-      const section = params.get('sec') || params.get('section');
-      
-      if (section) {
-        // Delay para asegurar que el DOM esté listo
-        setTimeout(() => {
-          if (smoothScroll.scrollToElement(section)) {
-            // Limpiar URL después del scroll
-            const cleanUrl = location.pathname + location.hash;
-            history.replaceState(null, '', cleanUrl);
-          }
-        }, 100);
-      } else if (location.hash) {
-        // Manejar hash existente en la URL
-        const anchorId = location.hash.slice(1);
-        setTimeout(() => {
-          smoothScroll.scrollToElement(anchorId);
-        }, 100);
-      }
-    },
-
-    // Manejar navegación con botones del navegador (back/forward)
-    handlePopState() {
-      if (location.hash) {
-        const anchorId = location.hash.slice(1);
-        smoothScroll.scrollToElement(anchorId);
-      }
-    }
-  };
-
-  // ==============================================
-  // INICIALIZACIÓN
-  // ==============================================
-  function init() {
-    // Construir menú de navegación inicial
-    navigationBuilder.buildMenu();
-
-    // Iniciar observador de scroll
-    scrollObserver.init();
-
-    // Registrar event listeners
-    document.addEventListener('click', eventHandlers.handleClick);
-    window.addEventListener('popstate', eventHandlers.handlePopState);
     
-    // Manejar carga inicial
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', eventHandlers.handleInitialLoad);
-    } else {
-      eventHandlers.handleInitialLoad();
+    /**
+     * Configura el Intersection Observer para el scroll spy.
+     */
+    setupScrollSpy() {
+      if (this.observer) this.observer.disconnect();
+
+      const options = {
+        rootMargin: `-${this.getOffset()}px 0px -40% 0px`,
+        threshold: 0.1
+      };
+      
+      let lastActiveId = null;
+
+      this.observer = new IntersectionObserver(entries => {
+        let bestEntry = null;
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                if (!bestEntry || entry.boundingClientRect.top < bestEntry.boundingClientRect.top) {
+                    bestEntry = entry;
+                }
+            }
+        });
+        
+        const newActiveId = bestEntry ? bestEntry.target.id : lastActiveId;
+        
+        if (newActiveId !== lastActiveId) {
+            this.updateActiveState(newActiveId);
+            lastActiveId = newActiveId;
+        }
+
+      }, options);
+
+      this.anchors.forEach(anchor => this.observer.observe(anchor.element));
     }
-
-    // Observar cambios en el DOM para actualizar menú automáticamente
-    const domObserver = new MutationObserver(() => {
-      navigationBuilder.updateMenu();
-      scrollObserver.refresh();
-    });
-
-    // Configurar qué observar
-    domObserver.observe(document.body, {
-      childList: true,        // Cambios en hijos
-      subtree: true,          // Cambios en todo el árbol
-      attributes: true,       // Cambios en atributos
-      attributeFilter: ['id', 'data-anchor-name'] // Solo estos atributos
-    });
-
-    // ==============================================
-    // API PÚBLICA
-    // ==============================================
-    // Exponer funciones para uso externo
-    window.AnchorNavigation = {
-      // Navegar a un ancla programáticamente
-      scrollTo: (anchor) => smoothScroll.scrollToElement(anchor),
-      
-      // Refrescar el menú y observadores
-      refresh: () => {
-        navigationBuilder.updateMenu();
-        scrollObserver.refresh();
-      },
-      
-      // Obtener lista de todas las anclas
-      getAnchors: () => utils.getAllAnchors(),
-      
-      // Acceso a la configuración
-      config
-    };
-
-    // Disparar evento cuando el sistema está listo
-    window.dispatchEvent(new CustomEvent('anchorNavigationReady'));
+    
+    /**
+     * Maneja el scroll inicial si hay un hash o parámetro en la URL.
+     */
+    handleInitialLoad() {
+        const hash = window.location.hash.substring(1);
+        if (hash) {
+            setTimeout(() => this.scrollToElement(hash), 100);
+        }
+    }
   }
 
-  // ==============================================
-  // ARRANQUE
-  // ==============================================
-  // Iniciar cuando el DOM esté listo
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
+  // Inicializa la clase para cada bloque de navegación en la página
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.anchor-nav-block').forEach(blockElement => {
+      new AnchorNavigation(blockElement);
+    });
+  });
+
 })();

@@ -2,7 +2,7 @@
 
 client_id = "c7d3808eee057b62f88c77d6213efb5f"
 name = "Navegacion Mejorada"
-application_url = "https://goal-survive-brand-sherman.trycloudflare.com"
+application_url = "https://batch-conversion-lbs-expense.trycloudflare.com"
 embedded = true
 handle = "navegacion-mejorada"
 
@@ -26,7 +26,7 @@ api_version = "2025-07"
 scopes = "write_products"
 
 [auth]
-redirect_urls = ["https://goal-survive-brand-sherman.trycloudflare.com/auth/callback", "https://goal-survive-brand-sherman.trycloudflare.com/auth/shopify/callback", "https://goal-survive-brand-sherman.trycloudflare.com/api/auth/callback"]
+redirect_urls = ["https://batch-conversion-lbs-expense.trycloudflare.com/auth/callback", "https://batch-conversion-lbs-expense.trycloudflare.com/auth/shopify/callback", "https://batch-conversion-lbs-expense.trycloudflare.com/api/auth/callback"]
 
 [pos]
 embedded = false

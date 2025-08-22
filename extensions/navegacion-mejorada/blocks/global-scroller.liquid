@@ -1,0 +1,47 @@
+{%- comment -%}
+  Bloque: global-scroller.liquid (App Embed)
+  Propósito: Cargar el script de scroll suave en todas las páginas.
+  Este bloque es invisible y se activa una vez en el personalizador de temas.
+{%- endcomment -%}
+
+{%- liquid
+  assign scroll_offset = block.settings.offset | default: '80'
+  assign scroll_duration = block.settings.duration | default: 600
+-%}
+
+<script 
+  src="{{ 'global-scroller.js' | asset_url }}" 
+  defer
+  data-offset="{{ scroll_offset }}"
+  data-duration="{{ scroll_duration }}">
+</script>
+
+{% schema %}
+{
+  "name": "Scroll Suave Global",
+  "target": "body",
+  "templates": ["index", "product", "page", "collection", "list-collections"],
+  "settings": [
+    {
+      "type": "header",
+      "content": "Configuración Global del Scroll"
+    },
+    {
+      "type": "text",
+      "id": "offset",
+      "label": "Offset del header (px o selector)",
+      "info": "Píxeles o selector del header para calcular el espacio. Ej: '80' o '#shopify-section-header'",
+      "default": "80"
+    },
+    {
+      "type": "range",
+      "id": "duration",
+      "label": "Duración del scroll (ms)",
+      "min": 200,
+      "max": 2000,
+      "step": 100,
+      "default": 600
+    }
+  ]
+}
+{% endschema %}

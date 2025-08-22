@@ -2,13 +2,13 @@
 
 client_id = "c7d3808eee057b62f88c77d6213efb5f"
 name = "Navegacion Mejorada"
-application_url = "https://toronto-express-partition-wyoming.trycloudflare.com"
+application_url = "https://hip-disturbed-elephant-workflow.trycloudflare.com"
 embedded = true
 handle = "navegacion-mejorada"
 
 [build]
-include_config_on_deploy = true
 automatically_update_urls_on_dev = true
+include_config_on_deploy = true
 
 [webhooks]
 api_version = "2025-07"
@@ -26,7 +26,7 @@ api_version = "2025-07"
 scopes = "write_products"
 
 [auth]
-redirect_urls = ["https://toronto-express-partition-wyoming.trycloudflare.com/auth/callback", "https://toronto-express-partition-wyoming.trycloudflare.com/auth/shopify/callback", "https://toronto-express-partition-wyoming.trycloudflare.com/api/auth/callback"]
+redirect_urls = ["https://hip-disturbed-elephant-workflow.trycloudflare.com/auth/callback", "https://hip-disturbed-elephant-workflow.trycloudflare.com/auth/shopify/callback", "https://hip-disturbed-elephant-workflow.trycloudflare.com/api/auth/callback"]
 
 [pos]
 embedded = false

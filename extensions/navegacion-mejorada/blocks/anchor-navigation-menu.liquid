@@ -1,35 +1,27 @@
 {%- comment -%}
-App Block: anchor-navigation-menu.liquid
-Reemplaza la lógica de la SECTION usando block.settings y un wrapper propio.
+  App Block: anchor-navigation-menu.liquid
+  Propósito: Renderizar el contenedor del menú de navegación y cargar los assets.
+  Toda la lógica de renderizado del menú y funcionalidad es manejada por JavaScript.
 {%- endcomment -%}
 
-<div id="shopify-block-{{ block.id }}" class="anchor-nav-block"
+<div id="shopify-block-{{ block.id }}" 
+     class="anchor-nav-block"
      data-block-id="{{ block.id }}"
-     data-nav-position="{{ block.settings.nav_position }}"
-     data-nav-style="{{ block.settings.nav_style }}"
-     data-show-labels="{{ block.settings.show_labels }}"
      data-header-offset="{{ block.settings.header_offset }}"
      data-scroll-duration="{{ block.settings.scroll_duration }}"
-     data-hide-on-mobile="{{ block.settings.hide_on_mobile }}"
      data-auto-hide="{{ block.settings.auto_hide }}"
      data-auto-hide-delay="{{ block.settings.auto_hide_delay }}"
      data-show-progress="{{ block.settings.show_progress }}">
-  
-  {%- comment -%} Render del snippet con settings del BLOCK {%- endcomment -%}
-  {% render 'anchor-navigation',
-    nav_position: block.settings.nav_position,
-    nav_style: block.settings.nav_style,
-    show_labels: block.settings.show_labels,
-    header_offset: block.settings.header_offset,
-    scroll_duration: block.settings.scroll_duration,
-    nav_background: block.settings.nav_background,
-    nav_color: block.settings.nav_color,
-    nav_active_color: block.settings.nav_active_color,
-    hide_on_mobile: block.settings.hide_on_mobile,
-    auto_hide: block.settings.auto_hide,
-    show_progress: block.settings.show_progress
-  %}
 
+  {%- comment -%}
+    Este contenedor será poblado dinámicamente por el script 'navegacion-anclas.js'.
+    Las clases de estilo se aplican aquí para controlar la apariencia.
+  {%- endcomment -%}
+  <div class="anchor-navigation anchor-nav-{{ block.settings.nav_position }} anchor-nav-style-{{ block.settings.nav_style }}"
+       data-show-labels="{{ block.settings.show_labels }}">
+    </div>
+
+  {%- comment -%} Barra de progreso (opcional) controlada por el script. {%- endcomment -%}
   {%- if block.settings.show_progress -%}
     <div class="scroll-progress-indicator">
       <div class="scroll-progress-bar"></div>
@@ -37,74 +29,52 @@ Reemplaza la lógica de la SECTION usando block.settings y un wrapper propio.
   {%- endif -%}
 </div>
 
-{%- comment -%} Estilos (migrados a asset) {%- endcomment -%}
+{%- comment -%} Carga de assets unificados {%- endcomment -%}
 <link rel="stylesheet" href="{{ 'anchor-navigation.css' | asset_url }}">
+<script src="{{ 'navegacion-anclas.js' | asset_url }}" defer></script>
 
-{%- comment -%} Script (migrado a asset) {%- endcomment -%}
-<script src="{{ 'anchor-navigation.js' | asset_url }}" defer></script>
-
-{%- comment -%}
-SCHEMA del App Block:
-- Usamos block.settings (no section.settings)
-- target: "section" para poder agregarlo en cualquier sección del tema
-- Se eliminan presets/disabled_on/class/tag (no aplican en app blocks)
-{%- endcomment -%}
 {% schema %}
-{
-  "name": "🧭 Menú de Navegación por Anclas (App)",
-  "target": "section",
-  "limit": 16,
-  "settings": [
-    { "type": "header", "content": "📍 Posición y Estilo" },
-    {
-      "type": "select",
-      "id": "nav_position",
-      "label": "Posición del menú",
-      "options": [
-        { "value": "fixed-left", "label": "Fijo a la izquierda" },
-        { "value": "fixed-right", "label": "Fijo a la derecha" },
-        { "value": "fixed-top", "label": "Fijo arriba" },
-        { "value": "fixed-bottom", "label": "Fijo abajo" }
-      ],
-      "default": "fixed-right"
-    },
-    {
-      "type": "select",
-      "id": "nav_style",
-      "label": "Estilo visual",
-      "options": [
-        { "value": "dots", "label": "Puntos minimalistas" },
-        { "value": "lines", "label": "Líneas modernas" },
-        { "value": "buttons", "label": "Botones con texto" },
-        { "value": "pills", "label": "Píldoras" },
-        { "value": "numbers", "label": "Números" }
-      ],
-      "default": "dots"
-    },
-    { "type": "checkbox", "id": "show_labels", "label": "Mostrar etiquetas de texto", "default": false },
+  {
+    "name": "🧭 Menú de Navegación por Anclas",
+    "target": "section",
+    "limit": 1,
+    "settings": [
+      { "type": "header", "content": "📍 Posición y Estilo" },
+      {
+        "type": "select",
+        "id": "nav_position",
+        "label": "Posición del menú",
+        "options": [
+          { "value": "fixed-left", "label": "Fijo a la izquierda" },
+          { "value": "fixed-right", "label": "Fijo a la derecha" }
+        ],
+        "default": "fixed-right"
+      },
+      {
+        "type": "select",
+        "id": "nav_style",
+        "label": "Estilo visual",
+        "options": [
+          { "value": "dots", "label": "Puntos" },
+          { "value": "lines", "label": "Líneas" }
+        ],
+        "default": "dots"
+      },
+      { "type": "checkbox", "id": "show_labels", "label": "Mostrar etiquetas de texto", "default": false },
 
-    { "type": "header", "content": "🎨 Colores y Apariencia" },
-    { "type": "color_background", "id": "nav_background", "label": "Fondo del menú", "default": "linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%)" },
-    { "type": "color", "id": "nav_color", "label": "Color de los elementos", "default": "#666666" },
-    { "type": "color", "id": "nav_active_color", "label": "Color del elemento activo", "default": "#000000" },
-    { "type": "color", "id": "nav_hover_color", "label": "Color al pasar el mouse", "default": "#333333" },
-    { "type": "checkbox", "id": "glass_effect", "label": "Efecto glassmorphism", "default": true },
-    { "type": "range", "id": "blur_amount", "label": "Cantidad de desenfoque", "min": 0, "max": 20, "step": 1, "default": 10, "unit": "px" },
-
-    { "type": "header", "content": "⚙️ Comportamiento" },
-    { "type": "number", "id": "header_offset", "label": "Offset del header (px)", "default": 80 },
-    { "type": "range", "id": "scroll_duration", "label": "Duración del scroll", "min": 100, "max": 2000, "step": 100, "default": 600, "unit": "ms" },
-    { "type": "range", "id": "transition_speed", "label": "Velocidad de transiciones", "min": 100, "max": 1000, "step": 50, "default": 300, "unit": "ms" },
-
-    { "type": "header", "content": "📱 Responsive" },
-    { "type": "checkbox", "id": "hide_on_mobile", "label": "Ocultar en móviles", "default": false },
-    { "type": "checkbox", "id": "auto_hide", "label": "Auto-ocultar cuando no se usa", "default": false },
-    { "type": "range", "id": "auto_hide_delay", "label": "Retraso para auto-ocultar", "min": 1000, "max": 10000, "step": 500, "default": 3000, "unit": "ms" },
-
-    { "type": "header", "content": "📊 Indicador de Progreso" },
-    { "type": "checkbox", "id": "show_progress", "label": "Mostrar barra de progreso de scroll", "default": false },
-    { "type": "color", "id": "progress_color", "label": "Color de la barra de progreso", "default": "#000000" },
-    { "type": "range", "id": "progress_height", "label": "Altura de la barra", "min": 2, "max": 10, "step": 1, "default": 3, "unit": "px" }
-  ]
-}
+      { "type": "header", "content": "⚙️ Comportamiento" },
+      { "type": "text", "id": "header_offset", "label": "Offset del header (px o selector)", "default": "80", "info": "Ej: '80' o '#shopify-section-header'" },
+      { "type": "range", "id": "scroll_duration", "label": "Duración del scroll", "min": 200, "max": 2000, "step": 100, "default": 600, "unit": "ms" },
+      
+      { "type": "header", "content": "📱 Responsive" },
+      { "type": "checkbox", "id": "hide_on_mobile", "label": "Ocultar en móviles", "default": false },
+      
+      { "type": "header", "content": "✨ Funcionalidades Adicionales" },
+      { "type": "checkbox", "id": "auto_hide", "label": "Auto-ocultar menú", "default": false },
+      { "type": "range", "id": "auto_hide_delay", "label": "Retraso para ocultar", "min": 1000, "max": 10000, "step": 500, "default": 3000, "unit": "ms" },
+      { "type": "checkbox", "id": "show_progress", "label": "Mostrar barra de progreso", "default": false },
+      { "type": "color", "id": "progress_color", "label": "Color barra de progreso", "default": "#000000" },
+      { "type": "range", "id": "progress_height", "label": "Altura de la barra", "min": 2, "max": 10, "step": 1, "default": 3, "unit": "px" }
+    ]
+  }
 {% endschema %}

@@ -2,7 +2,7 @@
 
 client_id = "c7d3808eee057b62f88c77d6213efb5f"
 name = "Navegacion Mejorada"
-application_url = "https://example.com" # Shopify reemplazará esto automáticamente al instalar
+application_url = "https://example.com" # Shopify reemplaza esto automáticamente.
 embedded = true
 handle = "navegacion-mejorada"
 
@@ -10,38 +10,29 @@ handle = "navegacion-mejorada"
 automatically_update_urls_on_dev = true
 include_config_on_deploy = true
 
-# --- PERMISOS CORREGIDOS ---
-# Tu app necesita permisos para leer y escribir temas, no productos.
+# --- PERMISOS REQUERIDOS ---
 [access_scopes]
 scopes = "write_themes,read_themes"
 
-# --- URLS DE AUTENTICACIÓN LIMPIAS ---
+# --- URLS DE AUTENTICACIÓN ---
 [auth]
 redirect_urls = [
   "https://example.com/api/auth/callback"
 ]
 
-# --- WEBHOOKS ACTUALIZADOS Y COMPLETOS ---
+# --- WEBHOOKS GENERALES ---
 [webhooks]
 api_version = "2024-07"
 
-  # Webhooks existentes
   [[webhooks.subscriptions]]
   topics = [ "app/uninstalled" ]
   uri = "/webhooks/app/uninstalled"
 
-  # Webhooks obligatorios para cumplimiento de privacidad
-  [[webhooks.subscriptions]]
-  topics = [ "customers/data_request" ]
-  uri = "/webhooks/customers/data_request"
-
-  [[webhooks.subscriptions]]
-  topics = [ "customers/redact" ]
-  uri = "/webhooks/customers/redact"
-
-  [[webhooks.subscriptions]]
-  topics = [ "shop/redact" ]
-  uri = "/webhooks/shop/redact"
+# --- SECCIÓN ESPECIAL PARA WEBHOOKS OBLIGATORIOS ---
+[app.gdpr_webhooks]
+customers_data_request_url = "https://example.com/webhooks/customers/data_request"
+customers_redact_url = "https://example.com/webhooks/customers/redact"
+shop_redact_url = "https://example.com/webhooks/shop/redact"
 
 [pos]
 embedded = false

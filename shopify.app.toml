@@ -1,6 +1,6 @@
 client_id = "c7d3808eee057b62f88c77d6213efb5f"
 name = "Navegacion Mejorada"
-application_url = "https://example.com"
+application_url = "https://firewire-haiti-ac-metabolism.trycloudflare.com"
 embedded = true
 handle = "navegacion-mejorada"
 
@@ -13,10 +13,12 @@ scopes = "write_themes,read_themes"
 
 [auth]
 redirect_urls = [
-  "https://example.com/api/auth/callback"
+  "https://firewire-haiti-ac-metabolism.trycloudflare.com/auth/callback",
+  "https://firewire-haiti-ac-metabolism.trycloudflare.com/auth/shopify/callback",
+  "https://firewire-haiti-ac-metabolism.trycloudflare.com/api/auth/callback"
 ]
 
-# --- TODOS LOS WEBHOOKS DECLARADOS JUNTOS ---
+# --- WEBHOOKS (INCLUYENDO LOS OBLIGATORIOS) ---
 [webhooks]
 api_version = "2024-07"
 

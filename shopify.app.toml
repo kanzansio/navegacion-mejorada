@@ -1,32 +1,43 @@
-# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
-
-client_id = "c7d3808eee057b62f88c77d6213efb5f"
+# Este es el nombre de tu aplicación en el panel de Shopify.
 name = "Navegacion Mejorada"
-application_url = "https://jessica-knife-muscles-gmt.trycloudflare.com"
-embedded = true
-handle = "navegacion-mejorada"
+client_id = "c7d3808eee057b62f88c77d6213efb5f"
 
-[build]
-automatically_update_urls_on_dev = true
-include_config_on_deploy = true
+# Estos son los permisos que tu app solicita a los comerciantes.
+access_scopes = {
+  scopes = "write_themes,read_themes"
+}
 
+# Configuración de la autenticación.
+auth = {
+  redirect_urls = [
+    "https://example.com/api/auth/callback",
+    "https://example.com/api/auth/shopify/callback",
+    "https://example.com/api/auth/callback/offline"
+  ]
+}
+
+# ---- AQUÍ VA TU CONFIGURACIÓN DE WEBHOOKS ----
 [webhooks]
-api_version = "2025-07"
-
-  [[webhooks.subscriptions]]
-  topics = [ "app/scopes_update" ]
-  uri = "/webhooks/app/scopes_update"
+api_version = "2024-07"
 
   [[webhooks.subscriptions]]
   topics = [ "app/uninstalled" ]
   uri = "/webhooks/app/uninstalled"
 
-[access_scopes]
-# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "write_products"
+  # INICIO DE WEBHOOKS OBLIGATORIOS
+  [[webhooks.subscriptions]]
+  topics = [ "customers/data_request" ]
+  uri = "/webhooks/customers/data_request"
 
-[auth]
-redirect_urls = ["https://jessica-knife-muscles-gmt.trycloudflare.com/auth/callback", "https://jessica-knife-muscles-gmt.trycloudflare.com/auth/shopify/callback", "https://jessica-knife-muscles-gmt.trycloudflare.com/api/auth/callback"]
+  [[webhooks.subscriptions]]
+  topics = [ "customers/redact" ]
+  uri = "/webhooks/customers/redact"
 
+  [[webhooks.subscriptions]]
+  topics = [ "shop/redact" ]
+  uri = "/webhooks/shop/redact"
+  # FIN DE WEBHOOKS OBLIGATORIOS
+
+# Define las extensiones que forman parte de esta aplicación.
 [pos]
 embedded = false

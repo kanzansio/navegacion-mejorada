@@ -1,8 +1,6 @@
-# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
-
 client_id = "c7d3808eee057b62f88c77d6213efb5f"
 name = "Navegacion Mejorada"
-application_url = "https://example.com" # Shopify reemplaza esto automáticamente.
+application_url = "https://example.com" # Shopify reemplaza esto automáticamente
 embedded = true
 handle = "navegacion-mejorada"
 
@@ -20,7 +18,7 @@ redirect_urls = [
   "https://example.com/api/auth/callback"
 ]
 
-# --- WEBHOOKS GENERALES ---
+# --- WEBHOOKS GENERALES (NO OBLIGATORIOS) ---
 [webhooks]
 api_version = "2024-07"
 
@@ -28,11 +26,12 @@ api_version = "2024-07"
   topics = [ "app/uninstalled" ]
   uri = "/webhooks/app/uninstalled"
 
-# --- SECCIÓN ESPECIAL PARA WEBHOOKS OBLIGATORIOS ---
-[app.gdpr_webhooks]
-customers_data_request_url = "https://example.com/webhooks/customers/data_request"
-customers_redact_url = "https://example.com/webhooks/customers/redact"
-shop_redact_url = "https://example.com/webhooks/shop/redact"
+
+# --- SECCIÓN ESPECIAL Y CORRECTA PARA WEBHOOKS DE PRIVACIDAD ---
+[privacy_compliance_webhooks]
+customers_data_request_url = "/webhooks/customers/data_request"
+customers_redact_url = "/webhooks/customers/redact"
+shop_redact_url = "/webhooks/shop/redact"
 
 [pos]
 embedded = false

@@ -1,46 +1,20 @@
-# ==============================================
-# CONFIGURACIÓN PRINCIPAL
-# ==============================================
+# Nombre de la extensión que se ve en el editor de temas.
 name = "Navegación Suave por Anclas"
 type = "theme"
 
-# ==============================================
-# CAPACIDADES DE LA EXTENSIÓN
-# ==============================================
-# Define qué puede hacer tu extensión. En este caso, añade bloques a los temas.
+# Define qué puede hacer tu extensión.
 [capabilities]
 blocks = true
 
-# ==============================================
-# CONFIGURACIÓN PARA EL DESARROLLO
-# ==============================================
-[development]
-# Especifica que solo los bloques definidos en esta extensión estarán disponibles
-# en el editor de temas durante el desarrollo.
-exclusive_access = true
-
-# Archivos a observar para recarga en vivo.
-watch = [
-  "blocks/*",
-  "assets/*",
-  "locales/*"
-]
-
-# ==============================================
-# INSTRUCCIONES PARA COMERCIANTES
-# ==============================================
-# Estos son los pasos que el comerciante verá después de instalar.
+# Instrucciones para los comerciantes.
 [merchant_instructions]
-# Paso 1: Activar el App Embed Block
 enable_app_block.title = "Activar el Scroll Suave"
 enable_app_block.description = "Para empezar, activa el bloque 'Scroll Suave Global' en el editor de temas. Esto encenderá la funcionalidad en toda tu tienda."
 enable_app_block.block_name = "Scroll Suave Global"
 
-# Paso 2: Añadir Anclas
 add_anchor_blocks.title = "Añadir Puntos de Ancla"
 add_anchor_blocks.description = "Luego, arrastra el bloque 'Punto de Ancla' dentro de cada sección a la que quieras que el menú pueda navegar. Asígnale un ID único (ej: 'ofertas')."
 add_anchor_blocks.block_name = "Punto de Ancla"
 
-# Paso 3: Configurar el Menú de Navegación
 setup_navigation_menu.title = "Configurar el Menú Principal"
 setup_navigation_menu.description = "Finalmente, ve a 'Tienda online' > 'Navegación', y añade elementos a tu menú. En el campo 'Enlace', escribe '/#' seguido del ID del ancla que creaste (ej: '/#ofertas')."

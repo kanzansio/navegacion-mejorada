@@ -1,30 +1,36 @@
-# Este es el nombre de tu aplicación en el panel de Shopify.
-name = "Navegacion Mejorada"
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
 client_id = "c7d3808eee057b62f88c77d6213efb5f"
+name = "Navegacion Mejorada"
+application_url = "https://example.com" # Shopify reemplazará esto automáticamente al instalar
+embedded = true
+handle = "navegacion-mejorada"
 
-# Estos son los permisos que tu app solicita a los comerciantes.
-access_scopes = {
-  scopes = "write_themes,read_themes"
-}
+[build]
+automatically_update_urls_on_dev = true
+include_config_on_deploy = true
 
-# Configuración de la autenticación.
-auth = {
-  redirect_urls = [
-    "https://example.com/api/auth/callback",
-    "https://example.com/api/auth/shopify/callback",
-    "https://example.com/api/auth/callback/offline"
-  ]
-}
+# --- PERMISOS CORREGIDOS ---
+# Tu app necesita permisos para leer y escribir temas, no productos.
+[access_scopes]
+scopes = "write_themes,read_themes"
 
-# ---- AQUÍ VA TU CONFIGURACIÓN DE WEBHOOKS ----
+# --- URLS DE AUTENTICACIÓN LIMPIAS ---
+[auth]
+redirect_urls = [
+  "https://example.com/api/auth/callback"
+]
+
+# --- WEBHOOKS ACTUALIZADOS Y COMPLETOS ---
 [webhooks]
 api_version = "2024-07"
 
+  # Webhooks existentes
   [[webhooks.subscriptions]]
   topics = [ "app/uninstalled" ]
   uri = "/webhooks/app/uninstalled"
 
-  # INICIO DE WEBHOOKS OBLIGATORIOS
+  # Webhooks obligatorios para cumplimiento de privacidad
   [[webhooks.subscriptions]]
   topics = [ "customers/data_request" ]
   uri = "/webhooks/customers/data_request"
@@ -36,8 +42,6 @@ api_version = "2024-07"
   [[webhooks.subscriptions]]
   topics = [ "shop/redact" ]
   uri = "/webhooks/shop/redact"
-  # FIN DE WEBHOOKS OBLIGATORIOS
 
-# Define las extensiones que forman parte de esta aplicación.
 [pos]
 embedded = false

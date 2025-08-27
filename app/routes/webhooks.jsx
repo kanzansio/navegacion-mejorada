@@ -1,32 +1,32 @@
-  import { authenticate } from "../shopify.server";
-import db from "../db.server";
+ // app/routes/webhooks.jsx
 
+import { authenticate } from "../shopify.server";
+import db from "../db.server"; // La importación en sí está bien aquí.
+
+// ¡CRÍTICO! TODA la lógica que usa 'db' o 'authenticate' debe ir DENTRO de esta función.
 export const action = async ({ request }) => {
-  const { topic, shop, payload } = await authenticate.webhook(request);
+  const { topic, shop, session } = await authenticate.webhook(request);
 
-  if (!shop) {
-    return new Response("Unauthorized", { status: 401 });
+  if (!session) {
+    // Si no hay sesión, responde con un error y termina.
+    return new Response("No session found", { status: 401 });
   }
 
-  console.log(`Received webhook. Topic: ${topic}, Shop: ${shop}`);
-
+  // Ahora puedes usar la lógica del servidor de forma segura.
   switch (topic) {
     case "APP_UNINSTALLED":
-      // Lógica para cuando se desinstala la app
+      console.log("App desinstalada en la tienda:", shop);
+      // Aquí puedes hacer operaciones con la base de datos de forma segura
+      // await db.session.deleteMany({ where: { shop } });
       break;
-    case "CUSTOMERS_DATA_REQUEST":
-      // Lógica para la solicitud de datos del cliente
+    case "ORDERS_CREATE":
+      // Lógica para cuando se crea una orden...
       break;
-    case "CUSTOMERS_REDACT":
-      // Lógica para la eliminación de datos del cliente
-      break;
-    case "SHOP_REDACT":
-      // Lógica para la eliminación de datos de la tienda
-      break;
-    default:
-      console.log(`Unhandled webhook topic: ${topic}`);
+    case "PRODUCTS_UPDATE":
+      // Lógica para cuando se actualiza un producto...
       break;
   }
 
+  // Siempre devuelve una respuesta al final.
   return new Response(null, { status: 200 });
 };
